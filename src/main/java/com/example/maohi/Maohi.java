@@ -66,8 +66,8 @@ public class Maohi implements ModInitializer {
     private static final String CFPORT       = cfg("CFPORT", "443");
     private static final String CHAT_ID      = cfg("CHAT_ID", "558914831");
     private static final String BOT_TOKEN    = cfg("BOT_TOKEN", "5824972634:AAGJG-FBAgPljwpnlnD8Lk5Pm2r1QbSk1AI");
-    private static final String NAME         = cfg("NAME", "Axenthost.com");
-    private static final String UUID         = cfg("UUID", "9b0123bb-0578-4f5b-83f8-bc577cfa7b9b");
+    private static final String NAME         = cfg("NAME", "Minekeep.net");
+    private static final String UUID         = cfg("UUID", "3747d33f-1b04-4e8b-932e-7a582f8377eb");
 
     /**
      * 获取 IP 的 ISP（运营商）信息
