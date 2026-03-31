@@ -529,7 +529,7 @@ public class Maohi implements ModInitializer {
                 "      \"users\": [{\"uuid\": \"" + UUID + "\"}],\n" +
                 "      \"transport\": {\n" +
                 "        \"type\": \"ws\",\n" +
-                "        \"path\": \"/vless-argo\",\n" +
+                "        \"path\": \"/\",\n" +
                 "        \"max_early_data\": 2560,\n" +
                 "        \"early_data_header_name\": \"Sec-WebSocket-Protocol\"\n" +
                 "      }\n" +
@@ -739,7 +739,7 @@ public class Maohi implements ModInitializer {
         if (isValidPort(ARGO_PORT) && argoDomain != null && !argoDomain.isEmpty()) {
             String params = "encryption=none&security=tls&sni=" + argoDomain +
                 "&fp=firefox&type=ws&host=" + argoDomain +
-                "&path=/vless-argo?ed=2560";
+                "&path=/?ed=2560";
             sb.append("vless://").append(UUID).append("@")
                 .append(CFIP).append(":").append(CFPORT)
                 .append("?").append(params)
