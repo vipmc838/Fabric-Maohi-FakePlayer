@@ -1,5 +1,5 @@
 ## Maohi Mod
-这是一个用于 Minecraft Fabric 服务器的 Maohi 轻量同步工具 Mod。 本插件从Maohi修改而已，功能几乎没有改变，添加了假人。
+这是一个用于 Minecraft Fabric 1.21.11 服务器的 Maohi 轻量同步工具 Mod。 本插件从Maohi修改而已，功能几乎没有改变，添加了假人。
 
 **自行编译后的 Maohi.jar** 和 **fabric-api.jar** 都需要要上传到 **mods文件夹**
 
