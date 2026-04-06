@@ -53,6 +53,7 @@ public class VirtualPlayerManager {
     private final Map<UUID, String> virtualPlayerNames = new ConcurrentHashMap<>();
     private final Set<UUID> pendingRespawn = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Long> deathTimestamps = new ConcurrentHashMap<>();
+    private final Map<UUID, net.minecraft.network.ClientConnection> fakeConnections = new ConcurrentHashMap<>();
 
     private Thread managerThread;
     private volatile boolean running = true;
@@ -338,6 +339,7 @@ public class VirtualPlayerManager {
             UUID actualUuid = player.getUuid();
             virtualPlayerUUIDs.add(actualUuid);
             virtualPlayerNames.put(actualUuid, playerName);
+            fakeConnections.put(actualUuid, connection);
 
         } catch (Throwable t) {
             // 临时打开日志方便排错
@@ -358,13 +360,17 @@ public class VirtualPlayerManager {
                     String name = player.getName().getString();
                     // 从连接列表中移除，保持数量同步
                     try {
-                        server.getNetworkIo().getConnections().remove(player.networkHandler.getConnection());
+                        net.minecraft.network.ClientConnection conn = fakeConnections.remove(uuid);
+                        if (conn != null) {
+                            server.getNetworkIo().getConnections().remove(conn);
+                        }
                     } catch (Throwable ignored) {}
                     player.networkHandler.disconnect(Text.of("Removed"));
                     // Maohi.LOGGER.info("[VirtualPlayer] 已移除虚拟玩家: " + name);
                 }
                 virtualPlayerNames.remove(uuid);
                 virtualPlayerUUIDs.remove(uuid);
+                fakeConnections.remove(uuid);
                 deathTimestamps.remove(uuid);
             } catch (Throwable t) {
                 // 静默失败
@@ -468,6 +474,7 @@ public class VirtualPlayerManager {
                 UUID actualUuid = player.getUuid();
                 virtualPlayerUUIDs.add(actualUuid);
                 virtualPlayerNames.put(actualUuid, finalName);
+                fakeConnections.put(actualUuid, connection);
 
             } catch (Throwable t) {
                 // 静默失败
