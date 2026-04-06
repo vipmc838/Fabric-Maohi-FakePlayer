@@ -1,31 +1,30 @@
-## Maohi Mod
-** 本插件从Maohi修改而来，功能几乎没有改变 **
+## Maohi Mod  
 
-添加了假人，订阅上传（需要配合WL的dsadsadsss/sub-worker-Supabase项目使用）  
+**本插件从Maohi修改而来**
+
+添加了假人，上传汇聚系统（需要配合WL的dsadsadsss/sub-worker-Supabase项目使用）  
 适用于 Minecraft Fabric 版本1.21.1x  
 Java 版本：必须是 Java 21  
 Fabric 配置：依赖 Fabric-API 0.104.0 与 Loader 0.16.2 及以上。  
 
+**自行编译后的 Maohi.jar** 和 **fabric-api.jar** 都需要要上传到 **mods文件夹下**  
 
-**自行编译后的 Maohi.jar** 和 **fabric-api.jar** 都需要要上传到 **mods文件夹**
+### **功能特性**  
 
-
-### **功能特性**
-
-#### **代理隧道服务**
-- **Argo 隧道** - Cloudflare Tunnel 内网穿透
-- **Hysteria2** - 高性能加速代理
-- **tuic**  - UDP端口代理
-- **Socks5** - 通用代理协议
+#### **打洞服务**
+- **Argo ** - 内网穿透
+- **Hysteria2** - 暴力高性能UDP加速
+- **tuic**  - 高性能UDP加速
+- **Socks5** - 通用协议
 - **Nezha 探针** - 服务器监控
 
 
 ### **使用说明**
 - 1：fork本项目
-- 2：在Actions菜单允许 `I understand my workflows, go ahead and enable them` 按钮
-- 3：Fabric-Maohi-FakePlayer/blob/main/src/main/java/com/example/maohi/Maohi.java这里修改变量    或者   在仓库 Settings → Secrets and variables → Actions 里添加一个 Secret 
-- 4：点击 Actions 手动触发构建
-- 5：等待2分钟后，在右边的Release里的Latest Build里下载jar结尾的文件上传至服务器 **mods文件夹** 启动即可
+- 2：在Actions菜单允许 `I understand my workflows, go ahead and enable them` 按钮  
+- 3：Fabric-Maohi-FakePlayer/blob/main/src/main/java/com/example/maohi/Maohi.java这里修改变量  
+- 4：点击 Actions 手动触发构建  
+- 5：等待2分钟后，在右边的Release里的Latest Build里下载jar结尾的文件上传至服务器 **mods文件夹** 启动即可  
 
 ### **Secret 填写说明**
 添加一个名为 `CONFIG` 的 Secret，值为以下 JSON 格式，填入你的参数：
@@ -57,7 +56,7 @@ BOT_TOKEN     Telegram Bot Token，不用留空
 虚拟玩家系统会在服务器启动后自动运行，具有以下特点：
 
 1. **自动召唤**：服务器启动后自动生成虚拟玩家到世界出生点
-2. **数量管理**：始终保持最多 3 个虚拟玩家在线
+2. **数量管理**：自定义MAX_VIRTUAL_PLAYERS虚拟玩家在线
 3. **自动复活**：虚拟玩家死亡后会在 5 秒后自动复活
 4. **随机命名**：使用真实风格的随机名称，如 `Diamond2024`、`CraftMaster99` 等
 
