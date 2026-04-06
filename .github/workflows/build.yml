@@ -11,71 +11,76 @@ jobs:
       actions: write
 
     steps:
-      - name: Checkout repository
+      - name: 签出代码仓库
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: 安装 JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Setup Gradle
+      - name: 配置 Gradle 环境
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.8'
 
-      - name: Build with Gradle
+      - name: 使用 Gradle 执行编译
         run: gradle build
         env:
           CONFIG: ${{ secrets.CONFIG }}
 
-      - name: Get JAR file name
+      - name: 自动获取 JAR 文件名
         id: jar-name
         run: |
           JAR_FILE=$(find build/libs -name "*.jar" ! -name "*-dev.jar" ! -name "*-sources.jar" | head -1)
           echo "jar_file=$JAR_FILE" >> $GITHUB_OUTPUT
           echo "Found JAR file: $JAR_FILE"
 
-      - name: Delete existing release and tag
+      - name: 配置 Git 机器人身份
         run: |
-          # 1. 尝试使用全量命令删除旧 Release 和附带的 tag
-          gh release delete latest --cleanup-tag -y || true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 强行重置并清理云端 Release 与 Tag
+        run: |
+          # 1. 彻底删除本地和远程的旧标签
+          git tag -d latest || true
+          git push origin :refs/tags/latest || true
           
-          # 2. 强制清理远程 tag（兜底）
-          git push --delete origin latest || true
+          # 2. 尝试删除旧的 Release 发布页面
+          gh release delete latest -y || true
           
-          # 3. 将 latest 标签强行绑定到当前的最新代码 commit 上并推送到仓库
-          git tag -f latest
-          git push origin -f latest
+          # 3. 在当前 Commit 上新建强行绑定的标签并推送
+          git tag latest
+          git push origin latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Latest Release
+      - name: 发布最新的 Mod 固件包到 Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
-          name: Latest Build
+          name: Latest Build (Always Updated)
           body: |
-            ## Download
-            Download the JAR file below and place it in your server's `mods` folder.
+            Built from commit ${{ github.sha }}
           files: ${{ steps.jar-name.outputs.jar_file }}
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload build artifact
+      - name: 上传构建产物 (Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: maohi-latest-build
           path: ${{ steps.jar-name.outputs.jar_file }}
           retention-days: 60
 
-      - name: Delete old workflow runs
+      - name: 自动清理历史构建记录
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          retain_days: 1
-          keep_minimum_runs: 2
+          retain_days: 0 # 设为 0 表示无视天数，只要超出保留条数立刻删
+          keep_minimum_runs: 2 # 永远只保留最近的 2 次记录
