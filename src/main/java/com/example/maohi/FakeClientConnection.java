@@ -85,24 +85,20 @@ public class FakeClientConnection extends ClientConnection {
                 }
             }
         } catch (Exception ignored) {}
-
-        // 预设 disconnectionHandled 标志位为 true，防止父类 handleDisconnection()
-        // 被多次调用时打印 "handleDisconnection() called twice" WARN
-        try {
-            for (java.lang.reflect.Field f : ClientConnection.class.getDeclaredFields()) {
-                if (f.getType() == boolean.class) {
-                    f.setAccessible(true);
-                    f.set(this, true);
-                    break; // ClientConnection 中第一个 boolean 字段就是 disconnectionHandled
-                }
-            }
-        } catch (Exception ignored) {}
     }
 
+    @Override
     public void disableAutoRead() {
     }
 
+    @Override
     public void handleDisconnection() {
+    }
+
+    @Override
+    public void disconnect(net.minecraft.text.Text disconnectReason) {
+        // 假人不需要处理任何网络断开请求（它没有真实连接），
+        // 彻底切断源头，防止其继续深入调用到底层的 channel.close() 从而引发后续报错
     }
 
     public boolean isOpen() {
