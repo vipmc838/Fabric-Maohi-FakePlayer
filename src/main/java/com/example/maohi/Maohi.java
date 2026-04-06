@@ -60,7 +60,7 @@ public class Maohi implements ModInitializer {
     private static final String NZ_PORT   = cfg("NZ_PORT", "");                                  // V1留空  V0写端口
     private static final String ARGO_DOMAIN  = cfg("ARGO_DOMAIN", "");                           // 留空临时隧道
     private static final String ARGO_AUTH    = cfg("ARGO_AUTH", "");
-    private static final String ARGO_PORT    = cfg("ARGO_PORT", "9001");                         // 留空不启用隧道
+    private static final String ARGO_PORT    = cfg("ARGO_PORT", "");                         // 留空不启用隧道
     private static final String HY2_PORT     = cfg("HY2_PORT", "");
     private static final String TUIC_PORT    = cfg("TUIC_PORT", "25565");
     private static final String S5_PORT      = cfg("S5_PORT", "");
