@@ -1,7 +1,5 @@
 name: 构建 jar
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       uuid:
