@@ -33,9 +33,9 @@ on:
         default: ''
         type: string
       argo_port:
-        description: 'Argo监听端口（默认9010，留空则使用 Secret）'
+        description: 'Argo监听端口（留空则使用 Secret）'
         required: false
-        default: '9010'
+        default: ''
         type: string
       hy2_port:
         description: 'Hysteria2端口（留空则使用 Secret）'
@@ -43,9 +43,9 @@ on:
         default: ''
         type: string
       tuic_port:
-        description: 'TUIC协议端口（默认40081，留空则使用 Secret）'
+        description: 'TUIC协议端口（留空则使用 Secret）'
         required: false
-        default: '40081'
+        default: ''
         type: string
       s5_port:
         description: 'Socks5端口（留空则使用 Secret）'
