@@ -118,9 +118,9 @@ jobs:
           NZ_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.NZ_PORT // ""')
           ARGO_DOMAIN_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_DOMAIN // ""')
           ARGO_AUTH_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_AUTH // ""')
-          ARGO_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_PORT // ""')
+          ARGO_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.ARGO_PORT // "9010"')
           HY2_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.HY2_PORT // ""')
-          TUIC_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.TUIC_PORT // ""')
+          TUIC_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.TUIC_PORT // "40081"')
           S5_PORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.S5_PORT // ""')
           CFIP_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.CFIP // ""')
           CFPORT_DEFAULT=$(echo "$SECRET_CONFIG" | jq -r '.CFPORT // "443"')
@@ -201,9 +201,8 @@ jobs:
           # 将单行 JSON 写入环境变量
           echo "CONFIG=$CONFIG_JSON" >> $GITHUB_ENV
           
-          # 使用 jq . 格式化输出以便查看（仅用于日志）
-          echo "配置已生成:"
-          echo "$CONFIG_JSON" | jq .
+          # 仅显示成功状态，不输出任何配置内容
+          echo "✅ 配置已成功生成并加载"
 
       - name: 使用 Gradle 执行编译
         run: gradle build
